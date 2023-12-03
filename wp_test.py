@@ -5,6 +5,7 @@ sys.path.append("/opt/carla-simulator/PythonAPI/carla/dist/carla-0.9.13-py3.7-li
 import carla
 import random
 import time
+import pdb
 
 
 
