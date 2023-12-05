@@ -397,6 +397,7 @@ class CarEnv:
         global d_i_prev
         # Action is applied like steerin while throttle is cte
         # if settings.ACTIONS_NAMES[action] != settings.ACTIONS_NAMES[settings.N_actions-1]:
+        # action_control a dict with values for brake,steer and brake
         self.vehicle.apply_control(carla.VehicleControl(throttle=settings.ACTION_CONTROL[action][0],
                                                         brake=settings.ACTION_CONTROL[action][1],
                                                         steer=settings.ACTION_CONTROL[action][2]))
@@ -413,17 +414,20 @@ class CarEnv:
         #     kmh = 120
 
         # print("acumulado: ", acum)
+        # take the current location-rotation of the vehicle
         location_rv = self.vehicle.get_transform()
         # print(self.vehicle.get_location())
 
         # Se tiene un waypoint de carla
         # location = self.vehicle.get_location()
-
+        # euclidean distance
         d_i = math.sqrt((x_prev - location_rv.location.x) ** 2 + (y_prev - location_rv.location.y) ** 2)
-
+        # sum the d_i that the agent pass by
         acum += d_i
+        # make the current loc and rot the previous
         x_prev = location_rv.location.x
         y_prev = location_rv.location.y
+        # save the waypoints that the agents pass by
         self.position_array.append(
             [x_prev, y_prev, location_rv.location.z, location_rv.rotation.pitch, location_rv.rotation.yaw,
              location_rv.rotation.roll])
@@ -435,40 +439,55 @@ class CarEnv:
         reward, done, d2target = self.get_reward()
 
         if settings.SHOW_CAM == 1:
+            # used to create a window with a suitable name and size to display images and videos on the screen
             cv2.namedWindow('Real', cv2.WINDOW_AUTOSIZE)
+            # method is used to display an image in a window
             cv2.imshow('Real', self.front_camera)
+            # allows users to display a window for given milliseconds or until any key is pressed
             cv2.waitKey(1)
 
         # SALIDA UTILIZADA PARA EL PROGRAMA DE LOS WAYPOINTS OBTENIDOS POR TRATAMIENTO DE IMAGEN
+        # OUTPUT USED FOR THE PROGRAM OF THE WAYPOINTS OBTAINED BY IMAGE PROCESSING
+        # WORKING_MODE_OPTIONS[1] = "WAYPOINTS_IMAGE"
+        # means that crush os something bad happens bcs exit flag =1
         if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[1]:
             # im = cv2.resize(self.front_camera, (settings.IM_WIDTH_CNN, settings.IM_HEIGHT_CNN))
 
             state, exit_flag = self.Calcular_estado(self.front_camera)
+            # if vehicle crush
             if exit_flag == 1:
-                print('Se han perdido los waypoints, distancia al objetivo: ', d2target)
+                print('Waypoints, distance to target have been lost: ', d2target)
                 done = True
                 reward = -200
-
+            # if vehicle crush
             if done == True:
+                # we append the total distance that pass by
                 self.distance_acum.append(acum)
 
             return [self.front_camera, state], reward, done, None
 
         # SALIDA UTILIZADA EL RESTO DE PROGRAMAS
+        # OUTPUT USED THE REST OF PROGRAMS
         else:
             im = cv2.resize(self.front_camera, (settings.IM_WIDTH_CNN, settings.IM_HEIGHT_CNN))
             next, exit_flag = self.transform2local(im)
             # SI HA DADO UN BANDAZO Y NO SE VE NINGUN WAYPOINT DELANTE SE SALE
+            # IF YOU HAVE TURNED AND YOU CANNOT SEE ANY WAYPOINT AHEAD, YOU WILL LEAVE
 
             # Comprobar si en la imgaen BW segmentada se sale de la carretera
+            # Check if the segmented BW image goes off the road
+            # means that crush os something bad happens bcs exit flag =1
             if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[2] or settings.WORKING_MODE == \
                     settings.WORKING_MODE_OPTIONS[7]:
                 if np.count_nonzero(
+                        # If there are not a thousand white dots we say that we have left
                         self.front_camera) < 1000:  # si no hay mil puntos blancos decimos que nos hemos salido
                     exit_flag = 1
 
             # Comprobar si en la imagen RGB con carril se pierde el camino
+            # Check if the path is lost in the RGB image with rail
             # print(np.sum(self.front_camera[:, :, 1] == 234), np.sum(self.front_camera[:, :, 1] == 220))
+            # means that crush os something bad happens bcs exit flag =1
             if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[4] or settings.WORKING_MODE == \
                     settings.WORKING_MODE_OPTIONS[8] \
                     or settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[0]:
@@ -489,6 +508,7 @@ class CarEnv:
                 cv2.waitKey(1)
 
             if done == True:
+                # we append the total distance that pass by
                 self.distance_acum.append(acum)
 
             if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[8]:
@@ -498,21 +518,33 @@ class CarEnv:
                 return [im, next], reward, done, None
 
     def get_reward(self):
+        # take the velocity of the vehicle
         v = self.vehicle.get_velocity()
         kmh = int(3.6 * math.sqrt(v.x ** 2 + v.y ** 2 + v.z ** 2))
+        # reduce speed
         if kmh > 120:
             kmh = 120
 
         location = self.vehicle.get_location()
+        # cos(angle_rw)-|sin(angle_rw)|-|trackpos_rw|
+        # angle_rw and trackpos_rw calculated on the def transform2local
         progress = np.cos(self.angle_rw) - abs(np.sin(self.angle_rw)) - abs(self.trackpos_rw)
-        salida = 0  # CONDICIÓN DE SALIDA DEL PROGRAMA.
+        # CONDICIÓN DE SALIDA DEL PROGRAMA.
+        # PROGRAM EXIT CONDITION
+        # salida = exit
+        salida = 0
+        # the distance between the cur loc and the next loc or the final loc
         d2target = self.distance_target(self.Target, location)
         # CONDICIÓN DE SALIDA SI HAY COLISIÓN
+        # EXIT CONDITION IF THERE IS A COLLISION
         if len(self.collision_hist) != 0:  # or (len(self.crossline_hist) != 0)
             done = True
+            # salida = 1 means that u must do it again the simulation
             salida = 1
+            # very high negative reward that means something goes very, very bad
             reward = -200
-            print('Ha habido una colisión, distancia al objetivo: ', d2target)
+            print('There has been a collision, distance to target: ', d2target)
+            # goes to the next step/run the simulation again
             self.summary['Steps'] += 1
 
         # CONDICIÓN DE SALIDA SI HAY SALIDA DE CARRIL
@@ -522,10 +554,15 @@ class CarEnv:
         #     reward = -200
         #     print('Ha habido una salida de carril, distancia al objetivo: ', d2target)
         #     self.summary['Steps'] += 1
-
-        if salida == 0:  # SI NO HAY CONDICION DE SLAIDA DEL PROGRAMA
+        # SI NO HAY CONDICION DE SLAIDA DEL PROGRAMA
+        # IF THERE IS NO PROGRAM RELEASE CONDITION
+        if salida == 0:
 
             # SE LE DA LA RECOMPENSA EN FUNCION DE COMO VAYA EN LA CARRETERA
+            # THE REWARD IS GIVEN TO YOU BASED ON HOW YOU DO ON THE ROAD
+            # the reward given based on the progress u have done
+            # modo_recompensa = reward_mode
+            # # angle_rw and trackpos_rw calculated on the def transform2local
             if settings.modo_recompensa == 0:
                 if kmh < 10:
                     done = False
@@ -541,16 +578,18 @@ class CarEnv:
                 done = False
 
             # SI HA LLEGADO AL OBJETIVO SE CAMBIA LA RECOMPENSA Y SE SALE
+            # IF YOU HAVE REACHED THE GOAL, THE REWARD IS CHANGED AND YOU EXIT
             if self.distance_target(self.Target, location) < 15:
                 done = True
                 reward = 100
                 self.summary['Steps'] += 1
                 self.summary['Target'] += 1
-                print('Se ha llegado al objetivo')
+                print('The goal has been reached')
 
             # SI SE HA FINALIZADO EL TEMPORIZADOR SE CAMBIA LA RECOMPENSA Y SE SALE
+            # IF THE TIMER HAS ENDED, THE REWARD IS CHANGED AND THEY EXIT
             if self.episode_start + settings.SECONDS_PER_EPISODE < time.time():
-                print('Fin de temporizador, distancia al objetivo: ', d2target)
+                print('End of timer, distance to target: ', d2target)
                 done = True
                 self.summary['Steps'] += 1
                 if acum <= 50:
@@ -559,10 +598,13 @@ class CarEnv:
                     reward = -100
                 else:
                     reward = 100
-
-        self.cmd_vel = kmh / 120  # normalizo la velocidad
+        # normalizo la velocidad
+        # normalize the speed
+        self.cmd_vel = kmh / 120
+        ###### When an important fact happened the done = true and steps += 1
         return reward, done, d2target
 
+    # Calcular_estado = calculate_state
     def Calcular_estado(self, img2):
         global center_old
         kernel = np.ones((5, 5), np.uint8)
@@ -576,9 +618,12 @@ class CarEnv:
         width = gray.shape[1]
         waypoint = np.zeros((15,))
         waypoint_edges = np.zeros((15, 2))
+        # the size of the input state is 16
         state = np.zeros((settings.state_dim,))
 
         # CALCULO DEL PUNTO DE FUGA
+        # CALCULATION OF THE VANISHING POINT
+        # set the waypoints in the image that have size 15
         for i in range(0, 15):
             dato_y = int(height - 1 - 25 * i)
 
@@ -608,6 +653,8 @@ class CarEnv:
             # waypoint[i] = int((waypoint_edges[i][0] + waypoint_edges[i][1]) / 2)
 
         # PINTAR LOS PUNTOS DE LA CARRETERA
+        # PAINT THE POINTS ON THE ROAD
+        # paint the waypoints that we found in the image
         for i in range(0, 15):
             dato_y = int(height - 1 - 25 * i)
             waypointcenter2 = (int(waypoint[i]), int(dato_y))
@@ -622,21 +669,27 @@ class CarEnv:
                     waypoint[i] = 0
 
         # CALCULAR EL ÁNGULO DE LA CARRETERA
+        # CALCULATE THE ANGLE OF THE ROAD
         x_diff = waypoint[5] - waypoint[7]
         y_diff = (7 * 25 - 5 * 25) / (width / 2)
+        # we calculate the const angle_rw
         self.angle_rw = np.arctan2(x_diff, y_diff)
-
+        # state 0--->14 waypoint
+        # state 15 angle_rw
+        # state 16 cmd_vel (speed)
         state[0:(settings.state_dim - 2)] = waypoint
         state[settings.state_dim - 2] = self.angle_rw / math.pi
         state[settings.state_dim - 1] = self.cmd_vel
+        # we calculate the const trackpos_rw
         self.trackpos_rw = waypoint[0]
 
         if settings.SHOW_WAYPOINTS == 1:
             cv2.namedWindow('Punto de fuga', cv2.WINDOW_AUTOSIZE)
             cv2.imshow('Punto de fuga', gray)
             cv2.waitKey(1)
-
-        if np.count_nonzero(gray) < 1000:  # si no hay mil puntos blancos decimos que nos hemos salido
+        # si no hay mil puntos blancos decimos que nos hemos salido
+        # If there are not a thousand white dots we say that we have left
+        if np.count_nonzero(gray) < 1000:
             exit_flag = 1
 
         return state, exit_flag
@@ -668,7 +721,7 @@ class CarEnv:
                       [0, 0, 0, 1]))
         # print('WP1: ', aux_waypoints[0, :])
         # print('WP-1: ', aux_waypoints[-1, :])
-
+        # inverse the matrix
         M_inv = np.linalg.inv(M)
         P_locales = np.zeros((len(aux_waypoints), 4))
         # plt.figure(1)
@@ -679,6 +732,7 @@ class CarEnv:
         P_locales_aux = P_locales[self.pos_array_wp:(self.pos_array_wp + 30)]
 
         # Pintar el número de waypoints que se han pasado
+        # Paint the number of waypoints that have been passed
         wp_out = np.where(P_locales_aux[:, 1] < 0)
         n_wp_out = len(wp_out[0])
 
@@ -693,6 +747,7 @@ class CarEnv:
 
         nextt15_aux = nextWP[:, 0:2]
         # SE COMPRUEBA EL TAMAÑO DEL VECTOR DE WAYPOINTS, SI ES MENOR DE 15 SE ALARGA EL ÚLTIMO VALOR HASTA EL FINAL.
+        # THE SIZE OF THE WAYPOINT VECTOR IS CHECKED, IF IT IS LESS THAN 15 THE LAST VALUE IS EXTENDED UNTIL THE END.
         next15 = np.zeros((15, 2))
         tam_wp = len(nextt15_aux)
         if tam_wp < 15:

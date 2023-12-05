@@ -99,7 +99,9 @@ WAYPOINTS = 'X'     # X para utilizar solo coordenadas X, XY para utilizar coord
 THRESHOLD = 0  # FLAG DE UMBRALIZACIÓN
 DRAW_TRAJECTORY = 0 # NO PINTAR=0, PINTAR=1
 IM_LAYERS = 1
-state_dim = 16 #Dimension de los datos de entrada a la red.
+#Dimension de los datos de entrada a la red.
+# Dimension of input data to the network
+state_dim = 16
 dimension_vector_estado = 16 #Dimension del vector de estado calculado en transform2lcoal, necesario para recompensa en todos los casos
 if WORKING_MODE == WORKING_MODE_OPTIONS[0]:         # WAYPOINTS_CARLA
     if WAYPOINTS == 'XY':
