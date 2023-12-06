@@ -36,8 +36,8 @@ white = carla.Color(255, 255, 255)
 
 
 class CarEnv:
-    im_width = settings.IM_WIDTH_VISUALIZATION  # width of the image from the camera
-    im_height = settings.IM_HEIGHT_VISUALIZATION  # height of the image from the camera
+    im_width = settings.IM_WIDTH_VISUALIZATION  # width of the image that we want have
+    im_height = settings.IM_HEIGHT_VISUALIZATION  # height of the image that we want have
     front_camera = None
     angle_rw = 0
     trackpos_rw = 0
@@ -56,7 +56,7 @@ class CarEnv:
         # self.grp = GlobalRoutePlanner(self.map)
         self.prev_d2goal = 10000
         self.Target = 0
-        self.numero_tramo = 0
+        self.numero_tramo = 0 # numero_tramo = section_number
         self.error_lateral = []
         self.position_array = []
         self.prev_next = 0
@@ -110,7 +110,9 @@ class CarEnv:
         dst = np.float32([[569, settings.IM_HEIGHT_VISUALIZATION], [711, settings.IM_HEIGHT_VISUALIZATION], [0, 0],
                           [settings.IM_WIDTH_VISUALIZATION, 0]])
         self.M = cv2.getPerspectiveTransform(src, dst)
-
+    # return im, state_train
+    # return im, simple_state
+    # return self.front_camera, self.state_train
     @property
     def reset(self):
         global acum
@@ -200,6 +202,7 @@ class CarEnv:
                 [w1.transform.location.x, w1.transform.location.y, w1.transform.location.z,
                  w1.transform.rotation.pitch, w1.transform.rotation.yaw, w1.transform.rotation.roll])
         self.waypoints_current_plan.append([0, 0, 0, 0, 0, 0])
+        # the last point from the for
         self.Target = w1.transform.location
         ##################
         # if settings.DRAW_TRAJECTORY == 1:
@@ -269,7 +272,7 @@ class CarEnv:
 
         while self.front_camera is None:
             time.sleep(0.01)
-
+        # returns the time as a floating point number expressed in seconds since the epoch, in UTC
         self.episode_start = time.time()
         self.vehicle.apply_control(carla.VehicleControl(throttle=0.0, brake=0.0))
         location_reset = self.vehicle.get_transform()
@@ -277,7 +280,8 @@ class CarEnv:
         y_prev = location_reset.location.y
 
         # self.state_train = self.Calcular_estado(self.front_camera)
-        # WORKING_MODE_OPTIONS[0] == "WAYPOINTS_IMAGE"
+        # WORKING_MODE_OPTIONS[1] == "WAYPOINTS_IMAGE"
+        # Calcular_estado, transform2local returns the state and the exit flag
         if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[1]:
             # estado = situation
             self.state_train, _ = self.Calcular_estado(self.front_camera)
@@ -389,6 +393,9 @@ class CarEnv:
                 gray = cv2.erode(gray, kernel, iterations=2)
                 self.front_camera = gray
 
+    # return [im, next], reward, done, None
+    # return [self.front_camera, state], reward, done, None
+    # return [im, simple_state], reward, done, None
     def step(self, action):
         global x_prev
         global y_prev
@@ -461,7 +468,7 @@ class CarEnv:
                 reward = -200
             # if vehicle crush
             if done == True:
-                # we append the total distance that pass by
+                # we append the total distance that pass by and save the total distance
                 self.distance_acum.append(acum)
 
             return [self.front_camera, state], reward, done, None
@@ -517,9 +524,11 @@ class CarEnv:
             else:
                 return [im, next], reward, done, None
 
+    # return reward, done, d2target
     def get_reward(self):
         # take the velocity of the vehicle
         v = self.vehicle.get_velocity()
+        # from m/s to km/h
         kmh = int(3.6 * math.sqrt(v.x ** 2 + v.y ** 2 + v.z ** 2))
         # reduce speed
         if kmh > 120:
@@ -527,7 +536,7 @@ class CarEnv:
 
         location = self.vehicle.get_location()
         # cos(angle_rw)-|sin(angle_rw)|-|trackpos_rw|
-        # angle_rw and trackpos_rw calculated on the def transform2local
+        # angle_rw and trackpos_rw calculated on the def transform2local or Calcular_estado
         progress = np.cos(self.angle_rw) - abs(np.sin(self.angle_rw)) - abs(self.trackpos_rw)
         # CONDICIÓN DE SALIDA DEL PROGRAMA.
         # PROGRAM EXIT CONDITION
@@ -562,7 +571,7 @@ class CarEnv:
             # THE REWARD IS GIVEN TO YOU BASED ON HOW YOU DO ON THE ROAD
             # the reward given based on the progress u have done
             # modo_recompensa = reward_mode
-            # # angle_rw and trackpos_rw calculated on the def transform2local
+            # # angle_rw and trackpos_rw calculated on the def transform2local or Calcular_estado
             if settings.modo_recompensa == 0:
                 if kmh < 10:
                     done = False
@@ -605,6 +614,8 @@ class CarEnv:
         return reward, done, d2target
 
     # Calcular_estado = calculate_state
+    # return state, exit_flag
+    # detect road features (road edges,road lanes, angles) and determining whether the vehicle might have left the road.
     def Calcular_estado(self, img2):
         global center_old
         kernel = np.ones((5, 5), np.uint8)
@@ -623,7 +634,8 @@ class CarEnv:
 
         # CALCULO DEL PUNTO DE FUGA
         # CALCULATION OF THE VANISHING POINT
-        # set the waypoints in the image that have size 15
+        # determines where is the lane of the road  via waypoints and adjust these waypoints
+        # final draw these waypoints to see where is the road
         for i in range(0, 15):
             dato_y = int(height - 1 - 25 * i)
 
@@ -654,7 +666,6 @@ class CarEnv:
 
         # PINTAR LOS PUNTOS DE LA CARRETERA
         # PAINT THE POINTS ON THE ROAD
-        # paint the waypoints that we found in the image
         for i in range(0, 15):
             dato_y = int(height - 1 - 25 * i)
             waypointcenter2 = (int(waypoint[i]), int(dato_y))
@@ -669,7 +680,7 @@ class CarEnv:
                     waypoint[i] = 0
 
         # CALCULAR EL ÁNGULO DE LA CARRETERA
-        # CALCULATE THE ANGLE OF THE ROAD
+        # Computes the angle of the road, based on the waypoints
         x_diff = waypoint[5] - waypoint[7]
         y_diff = (7 * 25 - 5 * 25) / (width / 2)
         # we calculate the const angle_rw
@@ -680,7 +691,8 @@ class CarEnv:
         state[0:(settings.state_dim - 2)] = waypoint
         state[settings.state_dim - 2] = self.angle_rw / math.pi
         state[settings.state_dim - 1] = self.cmd_vel
-        # we calculate the const trackpos_rw
+        # we calculate the const trackpos_rw provide information about how centered the vehicle is to the detected
+        # lane or how many metres is from the road edges.
         self.trackpos_rw = waypoint[0]
 
         if settings.SHOW_WAYPOINTS == 1:
@@ -688,12 +700,13 @@ class CarEnv:
             cv2.imshow('Punto de fuga', gray)
             cv2.waitKey(1)
         # si no hay mil puntos blancos decimos que nos hemos salido
-        # If there are not a thousand white dots we say that we have left
+        # If there are not a thousand white dots means that we have detected that we are out of the road
         if np.count_nonzero(gray) < 1000:
             exit_flag = 1
 
         return state, exit_flag
-
+    # return state, exit_flag
+    # transforming waypoints from a global coordinate system to a local one
     def transform2local(self, im):
         state = np.zeros((settings.dimension_vector_estado,))
         actual_pos = self.vehicle.get_transform()
@@ -723,6 +736,7 @@ class CarEnv:
         # print('WP-1: ', aux_waypoints[-1, :])
         # inverse the matrix
         M_inv = np.linalg.inv(M)
+        # convert to local coordinates
         P_locales = np.zeros((len(aux_waypoints), 4))
         # plt.figure(1)
         for i in range(len(aux_waypoints)):
@@ -735,7 +749,7 @@ class CarEnv:
         # Paint the number of waypoints that have been passed
         wp_out = np.where(P_locales_aux[:, 1] < 0)
         n_wp_out = len(wp_out[0])
-
+        # the next wp determined if the vehicle hasn't pass from this wp
         nextWP = P_locales_aux[n_wp_out:(n_wp_out + 15)]
         self.pos_array_wp += n_wp_out
 
@@ -804,6 +818,7 @@ class CarEnv:
         self.trackpos_rw = next15[0][0]
 
         # print(exit_flag)
+        # calculate the next_state the predicted one
         if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[9]:
             waypoints_predicted = self.model_waypoints.predict(
                 np.array(im).reshape(-1, settings.IM_HEIGHT_CNN, settings.IM_WIDTH_CNN, 3) / 255, verbose=0)
@@ -812,6 +827,7 @@ class CarEnv:
             # waypoints[:, 0] = -waypoints[:, 0]
             if settings.SHOW_WAYPOINTS == 1:
                 # DIBUJAR LOS PUNTOS EN OPENCV
+                # DRAW THE POINTS IN OPENCV
 
                 for i in range(len(waypoints_predicted)):
                     pto = (int(waypoints_predicted[i][0] * 20 + 512 / 2), int(512 - waypoints_predicted[i][1] * 30))
@@ -833,6 +849,8 @@ class CarEnv:
                 return state, exit_flag
 
         # Se devuelve el valor normalizado entre 100 metros
+        # The normalized value is returned between 100 meters
+        # calculate the next state by the vector next15(its now predicted wp but from grp)
         if settings.WAYPOINTS == 'XY':
             state[0:(settings.dimension_vector_estado - 1)] = next15.flatten()
             state[settings.dimension_vector_estado - 1] = self.angle_rw
