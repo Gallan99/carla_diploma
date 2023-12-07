@@ -50,22 +50,31 @@ class DQNAgent:
     def __init__(self):
 
         self.model = Sequential()
+        # WORKING_MODE_OPTIONS[0] = WAYPOINTS_CARLA
+        # WORKING_MODE_OPTIONS[1] = WAYPOINTS_IMAGE
+        # WORKING_MODE_OPTIONS[7] = CNN_FLATTEN
+        # WORKING_MODE_OPTIONS[8] = TP_ANG
+        # WORKING_MODE_OPTIONS[9] = PRE_TRAINED_CNN
         if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[0] or \
                 settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[1] or \
                 settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[7] or \
                 settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[8] or \
                 settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[9]:
-
+            # ibput size 16 bcs state_dim = 16
             input_layer = Input(shape=[settings.state_dim, ])
+            # hidden layer 300 neuron
             h0 = Dense(300, activation="tanh")(input_layer)
             # h1 = Dense(600, activation="linear")(h0)
             # h2 = Dense(800, activation="linear")(h1)
-
+            # N_actions = len(ACTIONS_NAMES) output = 5
             output_layer = Dense(settings.N_actions, activation="linear")(h0)
+            # The Sequence version uses the Sequencial model while the Model([inputs], [outputs]) uses the Functional
+            # API.
+            # The first is easier to use, but only works for single-input single-output feed forward models
             self.model = Model(input=input_layer, output=output_layer)
             self.model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=["accuracy"])
             print(self.model.summary())
-
+            # input-->h0-->output
 
             # self.model.add(Dense(300, input_shape=[21], activation="relu"))
             # self.model.add(Dense(600, activation="relu"))
@@ -107,7 +116,7 @@ class DQNAgent:
                 predictions = Dense(settings.N_actions, activation='linear')(x)
                 self.model = Model(inputs=inputs, outputs=predictions)
                 self.model.compile(loss="mse", optimizer=Adam(lr=0.001, decay=settings.EPSILON_DECAY), metrics=['accuracy'])
-
+                # CNN1-->CNN2-->CNN3-->CNN4-->CNN5-->inputs-->x-->predictions
             elif (settings.CNN_MODEL == 2):  # 64x3 CNN
 
                 self.model.add(Conv2D(64, (3, 3), input_shape=(settings.IM_HEIGHT_CNN, settings.IM_WIDTH_CNN, settings.IM_LAYERS), padding='same'))
@@ -130,7 +139,7 @@ class DQNAgent:
                 predictions = Dense(settings.N_actions, activation='linear')(x)
                 self.model = Model(inputs=inputs, outputs=predictions)
                 self.model.compile(loss="mse", optimizer=Adam(lr=0.001, decay=settings.EPSILON_DECAY), metrics=['accuracy'])
-
+                # CNN1-->CNN2-->CNN3-->inputs-->x-->predictions
             elif (settings.CNN_MODEL == 3):
 
 
@@ -152,7 +161,7 @@ class DQNAgent:
                 self.model = Model(inputs=inputs, outputs=predictions)
 
                 self.model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=["accuracy"])
-
+                # CNN1 -->CNN2-->inputs-->x-->predictions
             elif (settings.CNN_MODEL == 4):
 
                 im_input = Input(shape=(settings.IM_WIDTH_CNN, settings.IM_HEIGHT_CNN, settings.IM_LAYERS), name='in_image')
@@ -183,15 +192,18 @@ class DQNAgent:
 
         try:
             self.model = load_model(settings.MODEL_PATH)
-            print('Modelo cargado:', settings.MODEL_PATH)
+            print('Loaded model:', settings.MODEL_PATH)
         except:
-            print('Entrenamiento nuevo')
+            print('New training')
 
         self.target_model = self.model
+        # model.get_weights() = returns a list of all weight tensors in the model, as Numpy arrays.
+        # model.set_weights = sets the values of the weights of the model
         self.target_model.set_weights(self.model.get_weights())
 
         self.replay_memory = deque(
-            maxlen=settings.REPLAY_MEMORY_SIZE)  # memory of previous actions, keep random set actions to help with volatility
+            maxlen=settings.REPLAY_MEMORY_SIZE)  # memory of previous actions, keep random set actions to help with
+        # volatility
 
         self.tensorboard = ModifiedTensorBoard(log_dir=f"logs/logs_{settings.WORKING_MODE}/{settings.TRAIN_MODE}-{int(time.time())}")
         self.target_update_counter = 0  # updates after every episode
@@ -208,19 +220,22 @@ class DQNAgent:
                                   show_layer_names=True, rankdir='TB')
 
     def update_replay_memory(self, transition):
+        # current_state,reward,action,done takes arguments from carla_env and new_state takes from trainDQN
         # transition = (current_state, action, reward, new_state, done)
         self.replay_memory.append(transition)
 
     def train(self):
         if len(self.replay_memory) < settings.MIN_REPLAY_MEMORY_SIZE:
             return
-
+        # length size 16
         minibatch = random.sample(self.replay_memory, settings.MINIBATCH_SIZE)
 
-
+        # pick curr_state from minibatch
         current_states = np.array([transition[0] for transition in minibatch])
-
+        # print the  current_qs_list in the graph
         with self.graph.as_default():
+            # as an input takes state that we have find from carla_env
+            # for its prediction we have 5 different Q-values
             current_qs_list = self.model.predict(current_states, settings.PREDICTION_BATCH_SIZE)
 
             # print("Model predict en train")

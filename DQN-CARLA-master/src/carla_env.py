@@ -19,12 +19,12 @@ try:
         'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
 except IndexError:
     pass
-
+sys.path.append("/opt/carla-simulator/PythonAPI/carla/dist/carla-0.9.13-py3.7-linux-x86_64.egg")
 import carla
 import carla_config as settings
 import re
-from navigation.global_route_planner import GlobalRoutePlanner
-from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
+from PythonAPI.carla.agents.navigation.global_route_planner import GlobalRoutePlanner
+#from carla.agents.navigation.global_route_planner_dao import GlobalRoutePlannerDAO
 
 red = carla.Color(255, 0, 0)
 green = carla.Color(0, 255, 0)
@@ -129,8 +129,8 @@ class CarEnv:
         #############################NUEVO
         self.d2goal = 1
         self.map = self.world.get_map()
-        self.dao = GlobalRoutePlannerDAO(self.map, 1.0)
-        self.grp = GlobalRoutePlanner(self.dao)
+        #self.dao = GlobalRoutePlannerDAO(self.map, 1.0)
+        self.grp = GlobalRoutePlanner(self.map, 1.0)
         self.grp.setup()
         #############################
 
@@ -707,6 +707,7 @@ class CarEnv:
         return state, exit_flag
     # return state, exit_flag
     # transforming waypoints from a global coordinate system to a local one
+    # and predict the next state via next15 or ANN
     def transform2local(self, im):
         state = np.zeros((settings.dimension_vector_estado,))
         actual_pos = self.vehicle.get_transform()

@@ -5,7 +5,7 @@ import time
 
 #Clear Carla Environment
 print('### Reseting Carla Map ###')
-os.system('python3 ' + settings.path2CARLA + 'PythonAPI/util/config.py -m ' + str(settings.CARLA_MAP))
+os.system('python3 ' + '/opt/carla-simulator/' + 'PythonAPI/util/config.py -m ' + str(settings.CARLA_MAP))
 time.sleep(5)
 
 
