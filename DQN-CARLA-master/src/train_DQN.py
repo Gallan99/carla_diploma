@@ -33,7 +33,7 @@ if __name__ == '__main__':
     random.seed(1)
     np.random.seed(1)
     tf.set_random_seed(1)
-    # Memory fraction, used mostly when trai8ning multiple agents
+    # Memory fraction, used mostly when training multiple agents
     # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=MEMORY_FRACTION)
     gpu_options = tf.GPUOptions(allow_growth=True)
     backend.set_session(tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)))
@@ -52,13 +52,15 @@ if __name__ == '__main__':
 
     while not agent.training_initialized:
         # print("Esperando inicializacion de agente")
+        # Waiting for agent initialization
         time.sleep(0.01)
+    # Before get_qs"
     # print("Antes de get_qs")
 
-    # Initialize predictions - forst prediction takes longer as of initialization that has to be done
+    # Initialize predictions - first prediction takes longer as of initialization that has to be done
     # It's better to do a first prediction then before we start iterating over episode steps
     # agent.get_qs(np.ones((env.im_height, env.im_width, IM_LAYERS)))
-
+    # making first Q-values prediction
     if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[0] or \
             settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[1] or \
             settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[7] or \
@@ -86,6 +88,7 @@ if __name__ == '__main__':
                 settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[1] or\
                 settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[8] or \
                 settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[9]:
+            # we take state train from transform2local
             _, state_train = env.reset
         else:
             state_train, _ = env.reset
@@ -103,13 +106,16 @@ if __name__ == '__main__':
 
             # This part stays mostly the same, the change is to query a model for Q values
             if np.random.random() > epsilon:
+                # perform exploitation
                 # Get action from Q table
                 action_vector = agent.get_qs(state_train)
+                # returns the highest Q-value
                 action = np.argmax(action_vector)
                 #print(settings.ACTIONS_NAMES[action])
                 # print(settings.ACTIONS_NAMES[action])
 
             else:
+                # perform exploration
                 # Get random action
                 # print("Accion random")
                 action = np.random.randint(0, settings.N_actions)
@@ -121,7 +127,7 @@ if __name__ == '__main__':
             # elif settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[1]:
             #     new_image, reward, done, info = env.step(action)
             #     new_state_train = env.Calcular_estado(new_image)
-
+            # we take new_state_train from transform2local
             if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[0] or \
                     settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[1] or\
                     settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[8] or \
@@ -137,6 +143,7 @@ if __name__ == '__main__':
             #print('Action: ', ACTIONS_NAMES[action], ' Reward: ', reward)
 
             # Transform new continous state to new discrete state and count reward
+            # in every step we sum the rewards
             episode_reward += reward
 
             # Every step we update replay memory
@@ -167,14 +174,17 @@ if __name__ == '__main__':
         # Append episode reward to a list and log stats (every given number of episodes)
         ep_rewards.append(episode_reward)
         if (episode > 1) and ((episode % settings.AGGREGATE_STATS_EVERY) == 0) or (episode == 2):
+            # we sum the rewards from the last 10 episode
             average_reward = sum(ep_rewards[-settings.AGGREGATE_STATS_EVERY:]) / len(ep_rewards[-settings.AGGREGATE_STATS_EVERY:])
             min_reward = min(ep_rewards[-settings.AGGREGATE_STATS_EVERY:])
             max_reward = max(ep_rewards[-settings.AGGREGATE_STATS_EVERY:])
+            # we sum the distances from the last 10 episode
             average_dist = sum(env.distance_acum[-settings.AGGREGATE_STATS_EVERY:]) / len(env.distance_acum[-settings.AGGREGATE_STATS_EVERY:])
             agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward,
                                            efshowpsilon=epsilon, avegare_dist=average_dist)
 
-        #Guardar datos del entrenamiento en ficheros
+        # Guardar datos del entrenamiento en ficheros
+        # Save training data to files
         if episode % 3 == 0:
             agent.model.save(settings.AGENT_PATH + str(settings.TRAIN_MODE)+"_model.model")
         if episode % settings.N_save_stats == 0:

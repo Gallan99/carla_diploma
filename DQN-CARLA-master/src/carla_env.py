@@ -685,7 +685,7 @@ class CarEnv:
         y_diff = (7 * 25 - 5 * 25) / (width / 2)
         # we calculate the const angle_rw
         self.angle_rw = np.arctan2(x_diff, y_diff)
-        # state 0--->14 waypoint
+        # state 0--->14 waypoints
         # state 15 angle_rw
         # state 16 cmd_vel (speed)
         state[0:(settings.state_dim - 2)] = waypoint
@@ -819,7 +819,7 @@ class CarEnv:
         self.trackpos_rw = next15[0][0]
 
         # print(exit_flag)
-        # calculate the next_state the predicted one
+        # calculate the new_state_state the predicted one
         if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[9]:
             waypoints_predicted = self.model_waypoints.predict(
                 np.array(im).reshape(-1, settings.IM_HEIGHT_CNN, settings.IM_WIDTH_CNN, 3) / 255, verbose=0)

@@ -308,10 +308,11 @@ class DQNAgent:
                 settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[7] or \
                 settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[8] or \
                 settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[9]:
+            # X contains state train
             X = np.random.uniform(size=(1, settings.state_dim)).astype(np.float32)
         else:
             X = np.random.uniform(size=(1, settings.IM_HEIGHT_CNN, settings.IM_WIDTH_CNN, settings.IM_LAYERS)).astype(np.float32)
-
+        # y contains Q-values
         y = np.random.uniform(size=(1, settings.N_actions)).astype(np.float32)
         with self.graph.as_default():
             # print("Entra a graph")
