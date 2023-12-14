@@ -129,9 +129,9 @@ class CarEnv:
         #############################NUEVO
         self.d2goal = 1
         self.map = self.world.get_map()
-        self.dao = GlobalRoutePlannerDAO(self.map, 1.0)
-        self.grp = GlobalRoutePlanner(self.dao,1)
-        self.grp.setup()
+        #self.dao = GlobalRoutePlannerDAO(self.map, 1.0)
+        self.grp = GlobalRoutePlanner(self.map,1)
+        #self.grp.setup()
         #############################
 
         # aux_position = random.sample(self.positions, 1)

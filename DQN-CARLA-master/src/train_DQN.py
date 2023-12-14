@@ -33,11 +33,11 @@ if __name__ == '__main__':
     # For more repetitive results
     random.seed(1)
     np.random.seed(1)
-    tf.set_random_seed(1)
+    tf.compat.v1.set_random_seed(1)
     # Memory fraction, used mostly when training multiple agents
     # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=MEMORY_FRACTION)
-    gpu_options = tf.GPUOptions(allow_growth=True)
-    backend.set_session(tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)))
+    gpu_options = tf.compat.v1.GPUOptions(allow_growth=True)
+    backend.set_session(tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options)))
     # Create models folder
     if not os.path.isdir('models'):
         os.makedirs('models')
