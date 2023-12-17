@@ -238,7 +238,6 @@ class DQNAgent:
             # as an input takes state that we have find from carla_env
             # for its prediction we have 5 different Q-values
             current_qs_list = self.model.predict(current_states, settings.PREDICTION_BATCH_SIZE)
-
             # print("Model predict en train")
 
         # print("Después de model.predict")

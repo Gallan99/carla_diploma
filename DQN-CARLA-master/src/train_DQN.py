@@ -36,7 +36,7 @@ if __name__ == '__main__':
     tf.compat.v1.set_random_seed(1)
     # Memory fraction, used mostly when training multiple agents
     # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=MEMORY_FRACTION)
-    gpu_options = tf.compat.v1.GPUOptions(allow_growth=True)
+    gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.3)
     backend.set_session(tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options)))
     # Create models folder
     if not os.path.isdir('models'):
@@ -122,7 +122,6 @@ if __name__ == '__main__':
                 action = np.random.randint(0, settings.N_actions)
                 # This takes no time, so we add a delay matching 60 FPS (prediction above takes longer)
                 time.sleep(1 / FPS)
-
             # if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[0]:
             #     [_, new_state_train], reward, done, _ = env.step(action)
             # elif settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[1]:
@@ -156,7 +155,7 @@ if __name__ == '__main__':
             if done:
                 break
 
-
+        print('episode reward:',episode_reward)
         #print(agent.model.get_weights())
         #json_wei = agent.model.to_json()
         #print(json_wei)
@@ -183,7 +182,7 @@ if __name__ == '__main__':
             average_dist = sum(env.distance_acum[-settings.AGGREGATE_STATS_EVERY:]) / len(env.distance_acum[-settings.AGGREGATE_STATS_EVERY:])
             agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward,
                                            efshowpsilon=epsilon, avegare_dist=average_dist)
-
+            print('avg reward:',average_reward)
         # Guardar datos del entrenamiento en ficheros
         # Save training data to files
         if episode % 3 == 0:

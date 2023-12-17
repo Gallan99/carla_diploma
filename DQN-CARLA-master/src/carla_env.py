@@ -47,7 +47,7 @@ class CarEnv:
 
     def __init__(self):
         self.client = carla.Client("localhost", 2000)
-        self.client.set_timeout(2.0)
+        self.client.set_timeout(20.0)
         self.world = self.client.get_world()
         self.blueprint_library = self.world.get_blueprint_library()
         self.model_3 = self.blueprint_library.filter("model3")[0]
@@ -252,7 +252,7 @@ class CarEnv:
         self.sensor.listen(lambda data: self.process_img(data))
 
         self.vehicle.apply_control(carla.VehicleControl(throttle=0.0, brake=0.0))
-        time.sleep(4)
+        time.sleep(2)
 
         # This sensor, when attached to an actor, it registers an event each time the actor collisions against
         # something in the world.
@@ -320,8 +320,9 @@ class CarEnv:
         for i in range(len(current_plan) - 1):
             w1 = current_plan[i][0]
             w2 = current_plan[i + 1][0]
-            self.world.debug.draw_line(w1.transform.location, w2.transform.location, thickness=2.5,
-                                       color=green, life_time=life_t)
+
+            self.world.debug.draw_line(w1.transform.location, w2.transform.location, thickness=0.1,
+                        color=red, life_time=life_t)
 
             # world.debug.draw_point(w1.transform.location, 0.1, red, life_t)
 
@@ -504,7 +505,7 @@ class CarEnv:
 
             # print(self.front_camera[:, :, 1])
             if exit_flag == 1:
-                print('Se han perdido los waypoints, distancia al objetivo: ', d2target)
+                print('Waypoints have been lost, distance to the target: ', d2target)
                 done = True
                 reward = -200
 

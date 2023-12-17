@@ -19,7 +19,7 @@ def main():
     try:
         #connect client with the carla server
         client = carla.Client('localhost', 2000) 
-        client.set_timeout(100.0)
+        client.set_timeout(10000.0)
         #the world object has access to all the elements of the simulation.Load the town2
         world = client.load_world('Town02') 
         amap = world.get_map()
