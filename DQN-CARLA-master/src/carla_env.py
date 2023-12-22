@@ -728,6 +728,7 @@ class CarEnv:
 
         aux_waypoints = aux_waypoints[0:-1, 0:4]
         aux_waypoints[:, 3] = 1
+
         # aux_waypoints[:, 0] = -aux_waypoints[:, 0]
 
         M = np.array(([np.cos(yaw_c), -np.sin(yaw_c), 0, Xc],
@@ -744,9 +745,7 @@ class CarEnv:
         for i in range(len(aux_waypoints)):
             P_locales[i] = np.dot(M_inv, aux_waypoints[i, :])
         P_locales[:, 0] = -P_locales[:, 0]
-
         P_locales_aux = P_locales[self.pos_array_wp:(self.pos_array_wp + 30)]
-
         # Pintar el número de waypoints que se han pasado
         # Paint the number of waypoints that have been passed
         wp_out = np.where(P_locales_aux[:, 1] < 0)
@@ -808,6 +807,7 @@ class CarEnv:
         #     exit_flag = 1
 
         self.prev_next = next15
+
 
         # x_diff = next15[7][1] - next15[4][1]
         # y_diff = -(next15[7][0] - next15[4][0])
