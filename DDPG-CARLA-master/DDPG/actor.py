@@ -15,15 +15,25 @@ class ActorNetwork:
         self.lr = lr
 
         keras_backend.set_session(tf_session)
-
+        # make the Q-network
         self.model, self.model_states = self.generate_model()
+        # return a list of all trainable weight variables of the layers.
+        # These are the weights that get updated by the optimizer during training.
         model_weights = self.model.trainable_weights
-
+        # make the target network for the future Q
         self.target_model, _ = self.generate_model()
 
         # Generate tensors to hold the gradients for Policy Gradient update
+        # A placeholder is a variable in Tensorflow to which data will be assigned sometime later on
+        # return A Tensor that can be used to feed a value but cannot be evaluated directly.
         self.action_gradients = tf.placeholder(tf.float32, [None, action_size])
+        # model.output is a Tensor or list of Tensors that need to be differentiated. model_weights is a Tensor or
+        # list of Tensors which is used for differentiation. action_gradients is a Tensor or list of Tensors that is
+        # used to compute gradients for y. Returns: A list of Tensor of length len(xs) where each tensor is the sum(
+        # dy/dx) for y in model.output and for x in model_weights.
         self.parameter_gradients = tf.gradients(self.model.output, model_weights, -self.action_gradients)
+        # The zip() function returns a zip object, which is an iterator of tuples where the first item in each passed
+        # iterator is paired together, and then the second item in each passed iterator are paired together etc.
         self.gradients = zip(self.parameter_gradients, model_weights)
 
         self.optimize = tf.train.AdamOptimizer(self.lr).apply_gradients(self.gradients)
@@ -37,7 +47,7 @@ class ActorNetwork:
                 self.action_gradients: action_gradients,
             },
         )
-
+    # train the target network via the weights from the main network
     def train_target_model(self):
         main_weights = self.model.get_weights()
         target_weights = self.target_model.get_weights()
@@ -49,8 +59,11 @@ class ActorNetwork:
 
     def generate_model(self):
         input_layer = Input(shape=[self.state_size])
+        # 100 neurons
         h0 = Dense(hidden_units[0], activation="relu")(input_layer)
+        # 400 neurons
         h1 = Dense(hidden_units[1], activation="relu")(h0)
+        # 2 neurons (maybe one for steer and the other for throttle/brake)
         output_layer = Dense(2, activation="tanh")(h1)
         model = Model(input=input_layer, output=output_layer)
         tf.keras.utils.plot_model(model,
@@ -58,6 +71,6 @@ class ActorNetwork:
                                   show_shapes=True,
                                   show_layer_names=True, rankdir='TB')
 
-
+        # input-->h0-->h1-->output
 
         return model, input_layer
