@@ -460,7 +460,7 @@ class CarEnv:
         im = cv2.resize(self.front_camera, (settings.IM_WIDTH_CNN, settings.IM_HEIGHT_CNN))
         return im
 
-
+    # return reward, done, d2target
     def get_reward(self):
         v = self.vehicle.get_velocity()
         kmh = int(3.6 * math.sqrt(v.x ** 2 + v.y ** 2 + v.z ** 2))
@@ -478,7 +478,7 @@ class CarEnv:
             done = True
             salida = 1
             reward = -200
-            print('Ha habido una colisión, distancia al objetivo: ', d2target)
+            print('There has been a collision, distance to target: ', d2target)
             self.summary['Steps'] += 1
 
         ##CONDICIÓN DE SALIDA SI HAY SALIDA DE CARRIL
@@ -486,7 +486,7 @@ class CarEnv:
             done = True
             salida = 1
             reward = -200
-            print('Ha habido una salida de carril, distancia al objetivo: ', d2target)
+            print('There has been a collision, distance to target: ', d2target)
             self.summary['Steps'] += 1
 
         if salida == 0:  # SI NO HAY CONDICION DE SLAIDA DEL PROGRAMA
@@ -512,11 +512,11 @@ class CarEnv:
                 reward = 100
                 self.summary['Steps'] += 1
                 self.summary['Target'] += 1
-                print('Se ha llegado al objetivo')
+                print('The goal has been reached')
 
             # SI SE HA FINALIZADO EL TEMPORIZADOR SE CAMBIA LA RECOMPENSA Y SE SALE
             if self.episode_start + settings.SECONDS_PER_EPISODE < time.time():
-                print('Fin de temporizador, distancia al objetivo: ', d2target)
+                print('End of timer, distance to target: ', d2target)
                 done = True
                 self.summary['Steps'] += 1
                 if acum <= 50:
