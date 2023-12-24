@@ -28,14 +28,16 @@ class ActorNetwork:
         # return A Tensor that can be used to feed a value but cannot be evaluated directly.
         self.action_gradients = tf.placeholder(tf.float32, [None, action_size])
         # model.output is a Tensor or list of Tensors that need to be differentiated. model_weights is a Tensor or
-        # list of Tensors which is used for differentiation. action_gradients is a Tensor or list of Tensors that is
-        # used to compute gradients for y. Returns: A list of Tensor of length len(xs) where each tensor is the sum(
+        # model_weights is a Tensor or list of Tensors which is used for differentiation.
+        # action_gradients is a Tensor or list of Tensors that is used to compute gradients for y.
+        # Returns: A list of Tensor of length len(model_weights) where each tensor is the sum(
         # dy/dx) for y in model.output and for x in model_weights.
         self.parameter_gradients = tf.gradients(self.model.output, model_weights, -self.action_gradients)
         # The zip() function returns a zip object, which is an iterator of tuples where the first item in each passed
         # iterator is paired together, and then the second item in each passed iterator are paired together etc.
+        # for its weight their gradients parameter
         self.gradients = zip(self.parameter_gradients, model_weights)
-
+        # minimize the gradients via adam algorithm and change the weights
         self.optimize = tf.train.AdamOptimizer(self.lr).apply_gradients(self.gradients)
         self.tf_session.run(tf.global_variables_initializer())
 

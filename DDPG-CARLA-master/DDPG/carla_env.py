@@ -1,10 +1,10 @@
 import glob
 import os
 import sys
-
+sys.path.append("/opt/carla-simulator/PythonAPI/carla/dist/carla-0.9.13-py3.7-linux-x86_64.egg")
 import random
 import carla
-from carla import ColorConverter
+#from carla import ColorConverter
 import time as time
 import math
 import numpy as np
@@ -331,7 +331,7 @@ class CarEnv:
         else:
             if settings.THRESHOLD == 0:
                 if settings.IM_TYPE == 1:
-                    image.convert(ColorConverter.CityScapesPalette)
+                    print("now necessary")#image.convert(ColorConverter.CityScapesPalette)
                 i = np.array(image.raw_data)
                 i2 = i.reshape((self.im_height, self.im_width, 4))
                 i3 = i2[:, :, :3]

@@ -19,7 +19,8 @@ class CriticNetwork:
         self.model, self.state_input, self.action_input = self.generate_model()
 
         self.target_model, _, _ = self.generate_model()
-
+        # we take the gradients for the action input to feed them on the actor
+        # the current output is the Q-values. We want to maximize them and we train the actor via them
         self.critic_gradients = tf.gradients(self.model.output, self.action_input)
         self.tf_session.run(tf.global_variables_initializer())
 
@@ -29,6 +30,7 @@ class CriticNetwork:
             feed_dict={self.state_input: states, self.action_input: actions},
         )[0]
 
+    # train the target network via the weights from the main network
     def train_target_model(self):
         main_weights = self.model.get_weights()
         target_weights = self.target_model.get_weights()
@@ -51,7 +53,9 @@ class CriticNetwork:
 
         output_layer = Dense(1, activation="linear")(merged_h1)
         model = Model(input=[state_input, action_input], output=output_layer)
-
+        # state_input-->st_h1-->st_h2
+        # action-->act_h1
+        # merged act_h1 and st_h2 and feed it to merged_h1
 
 
 

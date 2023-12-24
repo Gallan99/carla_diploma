@@ -3,16 +3,15 @@ import time
 import keras.backend as keras_backend
 import numpy as np
 import tensorflow as tf
-from DDPG.carla_env import CarEnv
-from DDPG.actor import ActorNetwork
-from DDPG.critic import CriticNetwork
-from DDPG.actor_CNN import ActorNetwork_CNN
-from DDPG.critic_CNN import CriticNetwork_CNN
+from carla_env import CarEnv
+from actor import ActorNetwork
+from critic import CriticNetwork
+from actor_CNN import ActorNetwork_CNN
+from critic_CNN import CriticNetwork_CNN
 
 from keras.callbacks import TensorBoard
 # from util.noise import OrnsteinUhlenbeckActionNoise
-from DDPG.replay_buffer import ReplayBuffer
-import cv2
+from replay_buffer import ReplayBuffer
 import carla_config as settings
 from keras.models import load_model
 
@@ -75,7 +74,7 @@ def play(train_indicator):
     else:
         actor = ActorNetwork_CNN(tf_session=tf_session, tau=settings.tau, lr=settings.lra)
         critic = CriticNetwork_CNN(tf_session=tf_session, tau=settings.tau, lr=settings.lrc)
-
+    # making the buffer 10000
     buffer = ReplayBuffer(settings.buffer_size)
 
     env = CarEnv()
@@ -97,12 +96,13 @@ def play(train_indicator):
         print("Cannot load weights")
 
     ep_rewards = []
-
+    # we run it for 8000 episodes
     for i in range(settings.episodes_num):
         tensorboard.step = i
         print("Episode : %s Replay buffer %s" % (i, len(buffer)))
         if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[0] or settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[1]\
                 or settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[8]:
+            # we take state from transform2local
             _, state = env.reset()
 
         else:
