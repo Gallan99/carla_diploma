@@ -67,7 +67,7 @@ class CarEnv:
         self.prev_next = 0
         self.waypoints_txt = []
 
-        self.model_waypoints = load_model(settings.PRE_CNN_PATH)
+        #self.model_waypoints = load_model(settings.PRE_CNN_PATH)
 
         # self.model_waypoints.summary()
         #############NUEVO

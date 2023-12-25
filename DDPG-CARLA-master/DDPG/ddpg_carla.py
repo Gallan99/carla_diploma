@@ -140,7 +140,7 @@ def play(train_indicator):
                 buffer.add((current_state, action_predicted[0], reward, new_current_state, done))  # add replay buffer
 
 
-            # batch update
+            # get 32 random samples from the replay buffer
             batch = buffer.get_batch(settings.batch_size)
 
             states = np.asarray([e[0] for e in batch])
@@ -148,8 +148,10 @@ def play(train_indicator):
             rewards = np.asarray([e[2] for e in batch])
             new_states = np.asarray([e[3] for e in batch])
             dones = np.asarray([e[4] for e in batch])
+            # we save the r+Q for every action
             y_t = np.zeros((len(batch), 1))
             #try:
+            # find the Q-values
             target_q_values = critic.target_model.predict([new_states, actor.target_model.predict(new_states)])
 
             for k in range(len(batch)):
@@ -179,6 +181,7 @@ def play(train_indicator):
                 current_state = new_current_state
 
             # Imprimir estadísticas cada step
+            # Print statistics each step
             print("Episode %s - Step %s - Action %s - Reward %s" % (i, step, action_predicted[0], reward))
 
             step += 1
