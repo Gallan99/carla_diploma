@@ -161,6 +161,7 @@ def play(train_indicator):
                     y_t[k] = rewards[k] + settings.gamma * target_q_values[k]
 
             if train_indicator:
+                # we train the models via the random batch from the replay memory
                 loss += critic.model.train_on_batch([states, actions], y_t)
                 a_for_grad = actor.model.predict(states)
                 grads = critic.get_gradients(states, a_for_grad)

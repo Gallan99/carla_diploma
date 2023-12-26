@@ -16,7 +16,7 @@ TRAIN_MODE = "RANDOM"
 path2CARLA = "/home/robesafe/carla/" # PATH hasta carla se utiliza para limpiar el mapa
 #path2carla = "/home/proyectosros/carla/carla/"
 PRE_CNN_PATH = "PRE_CNN_models/PilotNet_2002m_BEV.model"
-save_weights_path = "data/data_" + str(WORKING_MODE) + "/"
+save_weights_path = "../data/data_" + str(WORKING_MODE) + "/"
 image_network = "NETWORKS/"
 
 # actor_weights_file  = "data/data_" + str(WORKING_MODE) + "/" + str(TRAIN_MODE) + "_best_reward_actor.h5"

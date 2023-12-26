@@ -27,7 +27,7 @@ class ActorNetwork:
         # A placeholder is a variable in Tensorflow to which data will be assigned sometime later on
         # return A Tensor that can be used to feed a value but cannot be evaluated directly.
         self.action_gradients = tf.placeholder(tf.float32, [None, action_size])
-        # model.output is a Tensor or list of Tensors that need to be differentiated. model_weights is a Tensor or
+        # model.output is a Tensor or list of Tensors that need to be differentiated.
         # model_weights is a Tensor or list of Tensors which is used for differentiation.
         # action_gradients is a Tensor or list of Tensors that is used to compute gradients for y.
         # Returns: A list of Tensor of length len(model_weights) where each tensor is the sum(
@@ -40,7 +40,7 @@ class ActorNetwork:
         # minimize the gradients via adam algorithm and change the weights
         self.optimize = tf.train.AdamOptimizer(self.lr).apply_gradients(self.gradients)
         self.tf_session.run(tf.global_variables_initializer())
-
+    # apply the gradients that we find on the model
     def train(self, states, action_gradients):
         self.tf_session.run(
             self.optimize,

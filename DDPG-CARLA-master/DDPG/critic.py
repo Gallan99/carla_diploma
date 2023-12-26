@@ -19,7 +19,7 @@ class CriticNetwork:
         self.model, self.state_input, self.action_input = self.generate_model()
 
         self.target_model, _, _ = self.generate_model()
-        # we take the gradients for the action input to feed them on the actor
+        # we take the gradients from the action input to feed them on the actor
         # the current output is the Q-values. We want to maximize them and we train the actor via them
         self.critic_gradients = tf.gradients(self.model.output, self.action_input)
         self.tf_session.run(tf.global_variables_initializer())
