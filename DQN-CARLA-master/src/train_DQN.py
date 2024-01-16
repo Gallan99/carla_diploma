@@ -6,7 +6,7 @@ import numpy as np
 import cv2
 import math
 from datetime import date
-
+import matplotlib.pyplot as plt
 
 import tensorflow as tf
 #from keras.backend import set_session as backend
@@ -26,7 +26,7 @@ from carla_env import CarEnv
 if __name__ == '__main__':
     distance_acum = []
     epsilon = settings.epsilon
-    FPS = 60
+    FPS = 20
     # For stats
     ep_rewards = [-200]
     # tf.config.optimizer.set_jit(True)
@@ -70,8 +70,11 @@ if __name__ == '__main__':
         agent.get_qs(np.ones(settings.state_dim, ))
     else:
         agent.get_qs(np.ones((settings.IM_HEIGHT_CNN, settings.IM_WIDTH_CNN, settings.IM_LAYERS)))
-
-
+    max_rewrd_list=[]
+    min_reward_list=[]
+    avg_reward_list=[]
+    avg_dist_list=[]
+    episode_list=[]
     # Iterate over episodes
     for episode in tqdm(range(1, settings.EPISODES + 1), ascii=True, unit='episodes'):
         # try:
@@ -175,11 +178,16 @@ if __name__ == '__main__':
         ep_rewards.append(episode_reward)
         if (episode > 1) and ((episode % settings.AGGREGATE_STATS_EVERY) == 0) or (episode == 2):
             # we sum the rewards from the last 10 episode
-            average_reward = sum(ep_rewards[-settings.AGGREGATE_STATS_EVERY:]) / len(ep_rewards[-settings.AGGREGATE_STATS_EVERY:])
-            min_reward = min(ep_rewards[-settings.AGGREGATE_STATS_EVERY:])
-            max_reward = max(ep_rewards[-settings.AGGREGATE_STATS_EVERY:])
+            average_reward = sum(ep_rewards[-settings.AGGREGATE_STATS_EVERY:]) / len(ep_rewards[-settings.AGGREGATE_STATS_EVERY:]) # avg reward from the last 10 episodes
+            min_reward = min(ep_rewards[-settings.AGGREGATE_STATS_EVERY:]) # min reward from the last 10 episodes
+            max_reward = max(ep_rewards[-settings.AGGREGATE_STATS_EVERY:]) # max reward from the last 10 episodes
             # we sum the distances from the last 10 episode
-            average_dist = sum(env.distance_acum[-settings.AGGREGATE_STATS_EVERY:]) / len(env.distance_acum[-settings.AGGREGATE_STATS_EVERY:])
+            average_dist = sum(env.distance_acum[-settings.AGGREGATE_STATS_EVERY:]) / len(env.distance_acum[-settings.AGGREGATE_STATS_EVERY:]) # avg distance from the last 10 episodes
+            avg_reward_list.append(average_reward)
+            min_reward_list.append(min_reward)
+            max_rewrd_list.append(max_reward)
+            avg_dist_list.append(average_dist)
+            episode_list.append(episode)
             agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward,
                                            efshowpsilon=epsilon, avegare_dist=average_dist)
             print('avg reward:',average_reward)
@@ -192,7 +200,26 @@ if __name__ == '__main__':
         if (episode > 10) and (episode_reward > np.max(ep_rewards[:-1])):
             agent.model.save(settings.AGENT_PATH + str(settings.TRAIN_MODE)+"_best_reward_model.model")
 
+
         acum = 0
+
+    file1 = open('200ep/avg_reward_list_200', 'w')
+    file2 = open('200ep/min_reward_list_200', 'w')
+    file3 = open('200ep/max_reward_list_200', 'w')
+    file4 = open('200ep/average_dist_list_200', 'w')
+    file5 = open('200ep/episode_200', 'w')
+    for i in range(0, len(avg_dist_list)):
+        file1.write("%s\n" % avg_reward_list[i])
+        file2.write("%s\n" % min_reward_list[i])
+        file3.write("%s\n" % max_rewrd_list[i])
+        file4.write("%s\n" % avg_dist_list[i])
+        file5.write("%s\n" % episode_list[i])
+    file1.close()
+    file2.close()
+    file3.close()
+    file4.close()
+    file5.close()
+
 
     # Set termination flag for training thread and wait for it to finish
     agent.terminate = True
