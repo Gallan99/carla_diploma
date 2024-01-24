@@ -7,7 +7,6 @@ import cv2
 import math
 from datetime import date
 import matplotlib.pyplot as plt
-
 import tensorflow as tf
 #from keras.backend import set_session as backend
 import keras.backend.tensorflow_backend as backend
@@ -220,6 +219,28 @@ if __name__ == '__main__':
     file4.close()
     file5.close()
 
+
+    x = np.array(episode_list)
+    y1 = np.array(avg_reward_list)
+    y2 = np.array(min_reward_list)
+    y3 = np.array(max_rewrd_list)
+    y4 = np.array(avg_dist_list)
+
+    plt.subplot(2, 2, 1)
+    plt.plot(x, y1, color = "red")
+    plt.title("Average Reward-Episodes")
+    plt.subplot(2, 2, 2)
+    plt.plot(x, y2, color = "blue")
+    plt.title("Minimum Reward-Episodes")
+    plt.subplot(2, 2, 3)
+    plt.plot(x, y3, color = "green")
+    plt.title("Maximum Reward-Episodes")
+    plt.subplot(2, 2, 4)
+    plt.plot(x, y4, color = "yellow")
+    plt.title("Average Distance-Episodes")
+
+
+    plt.show()
 
     # Set termination flag for training thread and wait for it to finish
     agent.terminate = True
