@@ -52,7 +52,7 @@ gamma = 0.99  # discount factor
 hidden_units = (100, 400, 600)
 
 #SIMULATION PARAMETERS
-episodes_num = 8000
+episodes_num = 20
 max_steps = 100000
 SECONDS_PER_EPISODE = 10*70
 SHOW_CAM = 1

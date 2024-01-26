@@ -8,6 +8,7 @@ from actor import ActorNetwork
 from critic import CriticNetwork
 from actor_CNN import ActorNetwork_CNN
 from critic_CNN import CriticNetwork_CNN
+import matplotlib.pyplot as plt
 
 from keras.callbacks import TensorBoard
 # from util.noise import OrnsteinUhlenbeckActionNoise
@@ -96,6 +97,11 @@ def play(train_indicator):
         print("Cannot load weights")
 
     ep_rewards = []
+    max_rewrd_list = []
+    min_reward_list = []
+    avg_reward_list = []
+    avg_dist_list = []
+    episode_list = []
     # we run it for 8000 episodes
     for i in range(settings.episodes_num):
         tensorboard.step = i
@@ -127,7 +133,7 @@ def play(train_indicator):
                 action_predicted = actor.model.predict(state.reshape(1, state.shape[0]))  # + ou()  # predict and add noise
                 [new_image, new_state], reward, done, info = env.step(action_predicted[0])
                 buffer.add((state, action_predicted[0], reward, new_state, done))  # add replay buffer
-                print(new_state)
+                #print(new_state)
 
             else:
                 action_predicted = actor.model.predict(np.array(current_state).reshape(-1, *current_state.shape))  # + ou()  # predict and add noise
@@ -200,8 +206,15 @@ def play(train_indicator):
             min_reward = min(ep_rewards[-AGGREGATE_STATS_EVERY:])
             max_reward = max(ep_rewards[-AGGREGATE_STATS_EVERY:])
             average_dist = np.mean(env.distance_acum[-AGGREGATE_STATS_EVERY:])
+            avg_reward_list.append(average_reward)
+            min_reward_list.append(min_reward)
+            max_rewrd_list.append(max_reward)
+            avg_dist_list.append(average_dist)
+            episode_list.append(i)
             tensorboard.update_stats(average_reward=average_reward, min_reward=min_reward, max_reward=max_reward,
                                      distance=average_dist, loss=loss)
+
+
 
         #Guardar datos del entrenamiento en ficheros
         if i % 3 == 0 and train_indicator:
@@ -231,6 +244,58 @@ def play(train_indicator):
         #     outfile.write(episode_stat + "\n")
         for actor_world in env.actor_list:
             actor_world.destroy()
+
+    file1 = open('DDPG/episodes_info/avg_reward_list', 'w')
+    file2 = open('DDPG/episodes_info/min_reward_list', 'w')
+    file3 = open('DDPG/episodes_info/max_reward_list', 'w')
+    file4 = open('DDPG/episodes_info/average_dist_list', 'w')
+    file5 = open('DDPG/episodes_info/episodes', 'w')
+    for i in range(0, len(avg_dist_list)):
+        file1.write("%s\n" % avg_reward_list[i])
+        file2.write("%s\n" % min_reward_list[i])
+        file3.write("%s\n" % max_rewrd_list[i])
+        file4.write("%s\n" % avg_dist_list[i])
+        file5.write("%s\n" % episode_list[i])
+    file1.close()
+    file2.close()
+    file3.close()
+    file4.close()
+    file5.close()
+
+
+    x = np.array(episode_list)
+    y1 = np.array(avg_reward_list)
+    y2 = np.array(min_reward_list)
+    y3 = np.array(max_rewrd_list)
+    y4 = np.array(avg_dist_list)
+
+    plt.subplot(2, 2, 1)
+    plt.plot(x[0:300], y1[0:300], color="red")
+    plt.title("Average Reward-Episodes_300")
+    plt.subplot(2, 2, 2)
+    plt.plot(x[0:300], y2[0:300], color="blue")
+    plt.title("Minimum Reward-Episodes_300")
+    plt.subplot(2, 2, 3)
+    plt.plot(x[0:300], y3[0:300], color="green")
+    plt.title("Maximum Reward-Episodes_300")
+    plt.subplot(2, 2, 4)
+    plt.plot(x[0:300], y4[0:300], color="yellow")
+    plt.title("Average Distance-Episodes_300")
+    plt.show()
+
+    plt.subplot(2, 2, 1)
+    plt.plot(x, y1, color="red")
+    plt.title("Average Reward-Episodes_600")
+    plt.subplot(2, 2, 2)
+    plt.plot(x, y2, color="blue")
+    plt.title("Minimum Reward-Episodes_600")
+    plt.subplot(2, 2, 3)
+    plt.plot(x, y3, color="green")
+    plt.title("Maximum Reward-Episodes_600")
+    plt.subplot(2, 2, 4)
+    plt.plot(x, y4, color="yellow")
+    plt.title("Average Distance-Episodes_600")
+    plt.show()
 
     actor.model.save_weights(settings.save_weights_path + str(settings.TRAIN_MODE) + "_actor.h5", overwrite=True)
     critic.model.save_weights(settings.save_weights_path + str(settings.TRAIN_MODE) + "_critic.h5", overwrite=True)
