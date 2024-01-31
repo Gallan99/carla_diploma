@@ -269,19 +269,6 @@ def play(train_indicator):
     y3 = np.array(max_rewrd_list)
     y4 = np.array(avg_dist_list)
 
-    plt.subplot(2, 2, 1)
-    plt.plot(x[0:300], y1[0:300], color="red")
-    plt.title("Average Reward-Episodes_300")
-    plt.subplot(2, 2, 2)
-    plt.plot(x[0:300], y2[0:300], color="blue")
-    plt.title("Minimum Reward-Episodes_300")
-    plt.subplot(2, 2, 3)
-    plt.plot(x[0:300], y3[0:300], color="green")
-    plt.title("Maximum Reward-Episodes_300")
-    plt.subplot(2, 2, 4)
-    plt.plot(x[0:300], y4[0:300], color="yellow")
-    plt.title("Average Distance-Episodes_300")
-    plt.show()
 
     plt.subplot(2, 2, 1)
     plt.plot(x, y1, color="red")
@@ -295,7 +282,13 @@ def play(train_indicator):
     plt.subplot(2, 2, 4)
     plt.plot(x, y4, color="yellow")
     plt.title("Average Distance-Episodes_600")
-    plt.show()
+    plt.subplots_adjust(left=0.1,
+                        bottom=0.1,
+                        right=0.9,
+                        top=0.9,
+                        wspace=0.4,
+                        hspace=0.4)
+    plt.savefig('episodes_stats_300.png')
 
     actor.model.save_weights(settings.save_weights_path + str(settings.TRAIN_MODE) + "_actor.h5", overwrite=True)
     critic.model.save_weights(settings.save_weights_path + str(settings.TRAIN_MODE) + "_critic.h5", overwrite=True)
