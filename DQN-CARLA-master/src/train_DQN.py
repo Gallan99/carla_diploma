@@ -8,7 +8,7 @@ import math
 from datetime import date
 import matplotlib.pyplot as plt
 import tensorflow as tf
-#from keras.backend import set_session as backend
+from keras.backend import set_session as backend
 import keras.backend.tensorflow_backend as backend
 from threading import Thread
 
@@ -18,6 +18,21 @@ from tqdm import tqdm
 import carla_config as settings
 from agent_model import DQNAgent
 from carla_env import CarEnv
+from keras.callbacks import TensorBoard
+import argparse
+import time
+import keras.backend as keras_backend
+import numpy as np
+import tensorflow as tf
+from carla_env import CarEnv
+
+import matplotlib.pyplot as plt
+
+from keras.callbacks import TensorBoard
+# from util.noise import OrnsteinUhlenbeckActionNoise
+
+import carla_config as settings
+from keras.models import load_model
 
 
 # Own Tensorboard class
@@ -25,7 +40,7 @@ from carla_env import CarEnv
 if __name__ == '__main__':
     distance_acum = []
     epsilon = settings.epsilon
-    FPS = 20
+    FPS = 60
     # For stats
     ep_rewards = [-200]
     # tf.config.optimizer.set_jit(True)
@@ -34,9 +49,10 @@ if __name__ == '__main__':
     np.random.seed(1)
     tf.compat.v1.set_random_seed(1)
     # Memory fraction, used mostly when training multiple agents
-    # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=MEMORY_FRACTION)
+    #gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=MEMORY_FRACTION)
     gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.3)
     backend.set_session(tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options)))
+
     # Create models folder
     if not os.path.isdir('models'):
         os.makedirs('models')
@@ -226,33 +242,29 @@ if __name__ == '__main__':
     y3 = np.array(max_rewrd_list)
     y4 = np.array(avg_dist_list)
 
-    plt.subplot(1, 4, 1)
-    plt.plot(x[0:300], y1[0:300], color = "red")
-    plt.title("Average Reward-Episodes_300")
-    plt.subplot(1, 4, 2)
-    plt.plot(x[0:300], y2[0:300], color = "blue")
-    plt.title("Minimum Reward-Episodes_300")
-    plt.subplot(1, 4, 3)
-    plt.plot(x[0:300], y3[0:300], color = "green")
-    plt.title("Maximum Reward-Episodes_300")
-    plt.subplot(1, 4, 4)
-    plt.plot(x[0:300], y4[0:300], color = "yellow")
-    plt.title("Average Distance-Episodes_300")
-    plt.show()
 
-    plt.subplot(1, 4, 1)
+
+
+    plt.subplot(2, 2, 1)
     plt.plot(x, y1, color="red")
     plt.title("Average Reward-Episodes_600")
-    plt.subplot(1, 4, 2)
+    plt.subplot(2, 2, 2)
     plt.plot(x, y2, color="blue")
     plt.title("Minimum Reward-Episodes_600")
-    plt.subplot(1, 4, 3)
+    plt.subplot(2, 2, 3)
     plt.plot(x, y3, color="green")
     plt.title("Maximum Reward-Episodes_600")
-    plt.subplot(1, 4, 4)
+    plt.subplot(2, 2, 4)
     plt.plot(x, y4, color="yellow")
     plt.title("Average Distance-Episodes_600")
-    plt.show()
+    plt.subplots_adjust(left=0.1,
+                        bottom=0.1,
+                        right=0.9,
+                        top=0.9,
+                        wspace=0.4,
+                        hspace=0.4)
+    plt.savefig('episodes_stats_600.png')
+
 
     # Set termination flag for training thread and wait for it to finish
     agent.terminate = True

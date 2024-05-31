@@ -47,7 +47,7 @@ class CarEnv:
 
     def __init__(self):
         self.client = carla.Client("localhost", 2000)
-        self.client.set_timeout(20.0)
+        self.client.set_timeout(200.0)
         self.world = self.client.get_world()
         self.blueprint_library = self.world.get_blueprint_library()
         self.model_3 = self.blueprint_library.filter("model3")[0]
@@ -86,7 +86,7 @@ class CarEnv:
         elif settings.TRAIN_MODE == settings.TRAIN_MODE_OPTIONS[4]:
             # self.pos_a = carla.Transform(carla.Location(x=196.748154, y=55.487041, z=1.000000),
             #                         carla.Rotation(pitch=360.000000, yaw=179.993011, roll=0.000000))
-            self.pos_a = carla.Transform(carla.Location(x=173.748154, y=55.487041, z=1.000000),
+            self.pos_a = carla.Transform(carla.Location(x=173.748154, y=55.487041, z=0.100000),
                                          carla.Rotation(pitch=360.000000, yaw=179.993011, roll=0.000000))
             self.pos_b = carla.Transform(carla.Location(x=109.849731, y=-2.049278, z=1.000000),
                                          carla.Rotation(pitch=0.000000, yaw=-179.993881, roll=0.000000))
@@ -181,6 +181,8 @@ class CarEnv:
 
                 a = self.pos_a.location
                 b = self.pos_b.location
+                print(a)
+                print(b)
                 self.current_plan = self.grp.trace_route(a, b)
                 self.d2goal = self.total_distance(self.current_plan)
 
@@ -195,7 +197,8 @@ class CarEnv:
             self.d2goal = self.total_distance(self.current_plan)
 
             self.transform = self.pos_a
-
+        print(self.pos_a)
+        print(self.pos_b)
         for i in range(len(self.current_plan)):
             w1 = self.current_plan[i][0]
             self.waypoints_current_plan.append(
@@ -252,7 +255,7 @@ class CarEnv:
         self.sensor.listen(lambda data: self.process_img(data))
 
         self.vehicle.apply_control(carla.VehicleControl(throttle=0.0, brake=0.0))
-        time.sleep(2)
+        time.sleep(0.1)
 
         # This sensor, when attached to an actor, it registers an event each time the actor collisions against
         # something in the world.
@@ -822,8 +825,7 @@ class CarEnv:
         # print(exit_flag)
         # calculate the new_state_state the predicted one
         if settings.WORKING_MODE == settings.WORKING_MODE_OPTIONS[9]:
-            waypoints_predicted = self.model_waypoints.predict(
-                np.array(im).reshape(-1, settings.IM_HEIGHT_CNN, settings.IM_WIDTH_CNN, 3) / 255, verbose=0)
+            waypoints_predicted = self.model_waypoints.predict(np.array(im).reshape(-1, settings.IM_HEIGHT_CNN, settings.IM_WIDTH_CNN, 3) / 255, verbose=0)
             waypoints_predicted = waypoints_predicted.reshape(15, 2)
 
             # waypoints[:, 0] = -waypoints[:, 0]

@@ -77,32 +77,32 @@ class CarEnv:
             # self.pos_b = carla.Transform(carla.Location(x=283.021973, y=199.059723, z=1.320625),
             #                              carla.Rotation(pitch=0.000000, yaw=-0.000092, roll=0.000000))
 
-            self.pos_a = carla.Transform(carla.Location(x=92.109985, y=105.661537, z=1.320625),
-                                         carla.Rotation(pitch=0.000000, yaw=-90.000298, roll=0.000000))
-            self.pos_b = carla.Transform(carla.Location(x=283.021973, y=199.059723, z=1.320625),
-                                         carla.Rotation(pitch=0.000000, yaw=-0.000092, roll=0.000000))
+            self.pos_a = carla.Transform(carla.Location(x=328.712982, y=195.114639, z=1.000000),
+                                         carla.Rotation(pitch=0.000000, yaw=180.004654, roll=0.000000))
+            self.pos_b = carla.Transform(carla.Location(x=88.415741, y=300.859680, z=1.000000),
+                                         carla.Rotation(pitch=0.000000, yaw=89.991280, roll=0.000000))
 
 
         elif settings.TRAIN_MODE == settings.TRAIN_MODE_OPTIONS[2]:
             self.pos_a = carla.Transform(carla.Location(x=208.669876, y=195.149597, z=1.000000),
-                                    carla.Rotation(pitch=360.000000, yaw=180.004654, roll=0.000000))
+                                         carla.Rotation(pitch=360.000000, yaw=180.004654, roll=0.000000))
             self.pos_b = carla.Transform(carla.Location(x=88.415741, y=300.859680, z=1.000000),
-                                    carla.Rotation(pitch=0.000000, yaw=89.991280, roll=0.000000))
+                                         carla.Rotation(pitch=0.000000, yaw=89.991280, roll=0.000000))
 
         elif settings.TRAIN_MODE == settings.TRAIN_MODE_OPTIONS[3]:
-            self.pos_a = carla.Transform(carla.Location(x=208.669876, y=195.149597, z=1.000000),
-                                    carla.Rotation(pitch=360.000000, yaw=180.004654, roll=0.000000))
+            self.pos_a = carla.Transform(carla.Location(x=150.669876, y=195.149597, z=1.000000),
+                                         carla.Rotation(pitch=360.000000, yaw=180.004654, roll=0.000000))
             self.pos_b = carla.Transform(carla.Location(x=92.385292, y=100.597343, z=1.000000),
-                                    carla.Rotation(pitch=360.000000, yaw=269.991272, roll=0.000000))
+                                         carla.Rotation(pitch=360.000000, yaw=269.991272, roll=0.000000))
 
         elif settings.TRAIN_MODE == settings.TRAIN_MODE_OPTIONS[4]:
-            self.pos_a = carla.Transform(carla.Location(x=196.748154, y=55.487041, z=1.000000),
-                                    carla.Rotation(pitch=360.000000, yaw=179.993011, roll=0.000000))
+            self.pos_a = carla.Transform(carla.Location(x=173.748154, y=55.487041, z=0.100000),
+                                         carla.Rotation(pitch=360.000000, yaw=179.993011, roll=0.000000))
             self.pos_b = carla.Transform(carla.Location(x=109.849731, y=-2.049278, z=1.000000),
-                            carla.Rotation(pitch=0.000000, yaw=-179.993881, roll=0.000000))
+                                         carla.Rotation(pitch=0.000000, yaw=-179.993881, roll=0.000000))
 
         elif settings.TRAIN_MODE == settings.TRAIN_MODE_OPTIONS[5]:
-            self.pos_a = carla.Transform(carla.Location(x=250.351135, y=59.474419, z=1.000000),
+            self.pos_a = carla.Transform(carla.Location(x=300.351135, y=59.474419, z=1.000000),
                                          carla.Rotation(pitch=0.000000, yaw=-0.006982, roll=0.000000))
             self.pos_b = carla.Transform(carla.Location(x=379.485901, y=2.017289, z=1.000000),
                                          carla.Rotation(pitch=360.000000, yaw=0.030457, roll=0.000000))
@@ -151,22 +151,22 @@ class CarEnv:
 
         if settings.TRAIN_MODE == settings.TRAIN_MODE_OPTIONS[6]:
             if self.ind == 0:
-                self.pos_a = carla.Transform(carla.Location(x=196.748154, y=55.487041, z=1.000000),
-                                             carla.Rotation(pitch=360.000000, yaw=179.993011, roll=0.000000))
-                self.pos_b = carla.Transform(carla.Location(x=109.849731, y=-2.049278, z=1.000000),
-                                             carla.Rotation(pitch=0.000000, yaw=-179.993881, roll=0.000000))
+                self.pos_a = carla.Transform(carla.Location(x=328.712982, y=195.114639, z=1.000000),
+                                             carla.Rotation(pitch=0.000000, yaw=180.004654, roll=0.000000))
+                self.pos_b = carla.Transform(carla.Location(x=88.415741, y=300.859680, z=1.000000),
+                                             carla.Rotation(pitch=0.000000, yaw=89.991280, roll=0.000000))
                 self.ind = 1
 
             elif self.ind == 1:
-                self.pos_a = carla.Transform(carla.Location(x=300.351135, y=59.474419, z=1.000000),
-                                             carla.Rotation(pitch=0.000000, yaw=-0.006982, roll=0.000000))
-                self.pos_b = carla.Transform(carla.Location(x=379.485901, y=2.017289, z=1.000000),
-                                             carla.Rotation(pitch=360.000000, yaw=0.030457, roll=0.000000))
+                self.pos_a = carla.Transform(carla.Location(x=173.748154, y=55.487041, z=1.000000),
+                                             carla.Rotation(pitch=360.000000, yaw=179.993011, roll=0.000000))
+                self.pos_b = carla.Transform(carla.Location(x=109.849731, y=-2.049278, z=1.000000),
+                                             carla.Rotation(pitch=0.000000, yaw=-179.993881, roll=0.000000))
                 self.ind = 2
 
             elif self.ind == 2:
-                self.pos_a = carla.Transform(carla.Location(x=196.748154, y=55.487041, z=1.000000),
-                                             carla.Rotation(pitch=360.000000, yaw=179.993011, roll=0.000000))
+                self.pos_a = carla.Transform(carla.Location(x=158.0, y=15.487041, z=1.000000),
+                                             carla.Rotation(pitch=0.000000, yaw=-90.0, roll=0.0))
                 self.pos_b = carla.Transform(carla.Location(x=109.849731, y=-2.049278, z=1.000000),
                                              carla.Rotation(pitch=0.000000, yaw=-179.993881, roll=0.000000))
                 self.ind = 1
@@ -176,24 +176,19 @@ class CarEnv:
             spawn_points = self.map.get_spawn_points()
             self.waypoints_current_plan = []
             # while self.d2goal > 200 or self.d2goal < 180:
-            while self.d2goal < 2000 and self.dif_angle_routes == 0:
+            while self.d2goal < 400:
                 self.pos_a = random.choice(spawn_points)
                 self.pos_b = random.choice(spawn_points)
-                angles_dif = abs(abs(self.pos_a.rotation.yaw) - abs(self.pos_b.rotation.yaw))
-                if angles_dif > 80 and angles_dif < 100:
-                    self.dif_angle_routes = 1
 
                 a = self.pos_a.location
                 b = self.pos_b.location
                 self.current_plan = self.grp.trace_route(a, b)
                 self.d2goal = self.total_distance(self.current_plan)
 
-
-            # self.current_plan = self.current_plan[:200]
+            self.current_plan = self.current_plan[:200]
             self.d2goal = self.total_distance(self.current_plan)
 
             self.transform = self.pos_a
-
         else:
             self.current_plan = self.grp.trace_route(self.pos_a.location, self.pos_b.location)
             # self.current_plan = self.current_plan[:200]

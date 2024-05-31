@@ -10,7 +10,7 @@ WORKING_MODE = "WAYPOINTS_CARLA"
 #TRAINING STAGES
 CARLA_MAP = "Town01"
 TRAIN_MODE_OPTIONS = ["RANDOM", "STRAIGHT", "TURN_LEFT", "TURN_RIGHT", "TURN_RIGHT_LEFT", "TURN_LEFT_RIGHT", "ALTERNATIVE"]
-TRAIN_MODE = "RANDOM"
+TRAIN_MODE = "TURN_RIGHT_LEFT"
 
 # PATHS
 path2CARLA = "/home/robesafe/carla/" # PATH hasta carla se utiliza para limpiar el mapa
@@ -52,7 +52,7 @@ gamma = 0.99  # discount factor
 hidden_units = (100, 400, 600)
 
 #SIMULATION PARAMETERS
-episodes_num = 20
+episodes_num = 601
 max_steps = 100000
 SECONDS_PER_EPISODE = 10*70
 SHOW_CAM = 1
