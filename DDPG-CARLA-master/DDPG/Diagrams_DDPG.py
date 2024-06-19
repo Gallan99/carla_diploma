@@ -36,6 +36,7 @@ y2 = np.array(min_reward_list)
 y3 = np.array(max_reward_list)
 y4 = np.array(average_dist_list)
 y5 = np.array(average_reward_list)
+y6 = np.array(episodes_dist_list)
 
 
 plt.plot(x1, y1, color="red")
@@ -58,7 +59,10 @@ plt.plot(x2, y5, color="red")
 plt.title("Average Reward-Episodes_DDPG")
 plt.savefig('Average Reward-Episodes_8000_DDPG.png')
 plt.close()
-
+plt.plot(x1, y6, color="red")
+plt.title("Distance-Episodes_DDPG")
+plt.savefig('Distance-Episodes_8000_DDPG.png')
+plt.close()
 
 
 
