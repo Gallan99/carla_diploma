@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import statistics
 
 
 
@@ -17,9 +19,29 @@ with open("C:/Users\galag\OneDrive\Diploma\DDPG-CARLA-master\DDPG\episodes_info\
 with open("C:/Users\galag\OneDrive\Diploma\DDPG-CARLA-master\DDPG\episodes_info\episodes_reward.txt") as f:
     episodes_reward_list = [float(x) for x in f.read().split()]
 
+# rolling mean for rewards and mean
+pd_reward = pd.DataFrame(episodes_reward_list)
+rolling_mean_reward = pd_reward.rolling(10).mean()
+pd_dist = pd.DataFrame(episodes_dist_list)
+rolling_mean_dist = pd_dist.rolling(10).mean()
 
+# Calculate standard deviation and print for rewards and dist
+std_reward_DDPG = statistics.stdev(episodes_reward_list)
+std_dist_DDPG = statistics.stdev(episodes_dist_list)
+print("Standard deviation of DDPG reward: " + str(std_reward_DDPG))
+print("Standard deviation of DDPG dist: " + str(std_dist_DDPG))
 
+# Calculate 25% and 50% percentiles for rewards and dist
+per50_rewards_DDPG = np.percentile(episodes_reward_list,50)
+per25_rewards_DDPG = np.percentile(episodes_reward_list,25)
+per50_dist_DDPG = np.percentile(episodes_dist_list,50)
+per25_dist_DDPG = np.percentile(episodes_dist_list,25)
+print("50th percentile of DDPG rewards: ", per50_rewards_DDPG)
+print("25th percentile of DDPG rewards: ", per25_rewards_DDPG)
+print("50th percentile of DDPG dist: ", per50_dist_DDPG)
+print("25th percentile of DDPG dist: ", per25_dist_DDPG)
 
+# make the averages values
 for i in range(0,len(episodes_list)):
     if (i>1) and (i % N == 0):
         average_episodes_list.append(i)
@@ -37,9 +59,11 @@ y3 = np.array(max_reward_list)
 y4 = np.array(average_dist_list)
 y5 = np.array(average_reward_list)
 y6 = np.array(episodes_dist_list)
-
+y7 = np.array(rolling_mean_reward)
+y8 = np.array(rolling_mean_dist)
 
 plt.plot(x1, y1, color="red")
+plt.plot(x1, y7, color="blue")
 plt.title("Reward-Episodes_DDPG")
 plt.savefig('Reward-Episodes_8000_DDPG.png')
 plt.close()
@@ -60,6 +84,7 @@ plt.title("Average Reward-Episodes_DDPG")
 plt.savefig('Average Reward-Episodes_8000_DDPG.png')
 plt.close()
 plt.plot(x1, y6, color="red")
+plt.plot(x1, y8, color="blue")
 plt.title("Distance-Episodes_DDPG")
 plt.savefig('Distance-Episodes_8000_DDPG.png')
 plt.close()
