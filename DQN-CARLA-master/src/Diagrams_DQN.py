@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import statistics
+import scipy.stats as st
 
 
 
@@ -21,9 +22,9 @@ with open("C:/Users\galag\OneDrive\Diploma\DQN-CARLA-master\src\episodes_info\ep
 
 # rolling mean for rewards and mean
 pd_reward = pd.DataFrame(episodes_reward_list)
-rolling_mean_reward = pd_reward.rolling(10).mean()
+rolling_mean_reward = pd_reward.rolling(500).mean()
 pd_dist = pd.DataFrame(episodes_dist_list)
-rolling_mean_dist = pd_dist.rolling(10).mean()
+rolling_mean_dist = pd_dist.rolling(500).mean()
 
 # Calculate standard deviation and print for rewards and dist
 std_reward_DQN = statistics.stdev(episodes_reward_list)
@@ -40,6 +41,22 @@ print("50th percentile of DQN rewards: ", per50_rewards_DQN)
 print("25th percentile of DQN rewards: ", per25_rewards_DQN)
 print("50th percentile of DQN dist: ", per50_dist_DQN)
 print("25th percentile of DQN dist: ", per25_dist_DQN)
+
+# Calculate the 95% confidence Intervals of rewards and dist
+sample_mean_r = np.mean(episodes_reward_list)
+sample_std_r = np.std(episodes_reward_list, ddof=1)
+sample_mean_d = np.mean(episodes_dist_list)
+sample_std_d = np.std(episodes_dist_list, ddof=1)
+n=len(episodes_reward_list)
+cl=0.95
+alpha = 1- cl
+z= st.norm.ppf(1-alpha/2)
+error = z*(sample_std_r/np.sqrt(n))
+ci_r = (sample_mean_r-error,sample_mean_r+error)
+error = z*(sample_std_d/np.sqrt(n))
+ci_d = (sample_mean_d-error,sample_mean_d+error)
+print("95% confidence intervals of rewards are between: ", ci_r)
+print("95% confidence intervals of dist are between: ", ci_d)
 
 
 for i in range(0,len(episodes_list)):
@@ -66,26 +83,38 @@ y8 = np.array(rolling_mean_dist)
 plt.plot(x1, y1, color="green")
 plt.plot(x1, y7, color="blue")
 plt.title("Reward-Episodes_DQN")
+plt.xlabel("Rewards")
+plt.ylabel("Episodes")
 plt.savefig('Reward-Episodes_8000_DQN.png')
 plt.close()
 plt.plot(x2, y2, color="green")
 plt.title("Minimum Reward-Episodes_DQN")
+plt.xlabel("Minimum Reward")
+plt.ylabel("Episodes")
 plt.savefig('Minimum Reward-Episodes_8000_DQN.png')
 plt.close()
 plt.plot(x2, y3, color="green")
 plt.title("Maximum Reward-Episodes_DQN")
+plt.xlabel("Maximum Rewards")
+plt.ylabel("Episodes")
 plt.savefig('Maximum Reward-Episodes_8000_DQN.png')
 plt.close()
 plt.plot(x2, y4, color="green")
 plt.title("Average Distance-Episodes_DQN")
+plt.xlabel("Average Distance(m)")
+plt.ylabel("Episodes")
 plt.savefig('Average Distance-Episodes_8000_DQN.png')
 plt.close()
 plt.plot(x2, y5, color="green")
 plt.title("Average Reward-Episodes_DQN")
+plt.xlabel("Average Rewards")
+plt.ylabel("Episodes")
 plt.savefig('Average Reward-Episodes_8000_DQN.png')
 plt.close()
 plt.plot(x1, y6, color="red")
 plt.plot(x1, y8, color="blue")
 plt.title("Distance-Episodes_DDPG")
-plt.savefig('Distance-Episodes_8000_DDPG.png')
+plt.xlabel("Distance(m)")
+plt.ylabel("Episodes")
+plt.savefig('Distance-Episodes_8000_DQN.png')
 plt.close()
