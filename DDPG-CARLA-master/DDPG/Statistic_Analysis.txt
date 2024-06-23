@@ -1,6 +1,0 @@
-Standard deviation of DDPG reward: 10939.81461157109
-Standard deviation of DDPG dist: 28.925808256896666
-50th percentile of DDPG rewards:  0.0
-25th percentile of DDPG rewards:  -485.4033590045452
-50th percentile of DDPG dist:  7.884680326886595
-25th percentile of DDPG dist:  0.9290634617050316
