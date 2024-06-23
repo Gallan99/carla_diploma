@@ -1,0 +1,8 @@
+Standard deviation of DQN reward: 37978.57207101004
+Standard deviation of DQN dist: 61.32556546064044
+50th percentile of DQN rewards:  -200.0
+25th percentile of DQN rewards:  -8002.317363287826
+50th percentile of DQN dist:  39.87164101458587
+25th percentile of DQN dist:  11.462341193423152
+95% confidence intervals of rewards are between:  (-9499.941831051294, -7835.384068982245)
+95% confidence intervals of dist are between:  (58.91495642098679, 61.60278643760562)
