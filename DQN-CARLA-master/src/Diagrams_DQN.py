@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import statistics
 import scipy.stats as st
+from statistics import mean
 
 
 
@@ -19,6 +20,11 @@ with open("C:/Users\galag\OneDrive\Diploma\DQN-CARLA-master\src\episodes_info\ep
     episodes_dist_list = [float(x) for x in f.read().split()]
 with open("C:/Users\galag\OneDrive\Diploma\DQN-CARLA-master\src\episodes_info\episodes_reward.txt") as f:
     episodes_reward_list = [float(x) for x in f.read().split()]
+
+
+# mean of reward and dist
+print("Average dist DQN: ",mean(episodes_dist_list))
+print("Average reward DQN: ",mean(episodes_reward_list))
 
 # rolling mean for rewards and mean
 pd_reward = pd.DataFrame(episodes_reward_list)
