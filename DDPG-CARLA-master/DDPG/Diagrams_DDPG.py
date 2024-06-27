@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import statistics
 import scipy.stats as st
+from statistics import mean
 
 
 
@@ -19,6 +20,9 @@ with open("C:/Users\galag\OneDrive\Diploma\DDPG-CARLA-master\DDPG\episodes_info\
     episodes_dist_list = [float(x) for x in f.read().split()]
 with open("C:/Users\galag\OneDrive\Diploma\DDPG-CARLA-master\DDPG\episodes_info\episodes_reward.txt") as f:
     episodes_reward_list = [float(x) for x in f.read().split()]
+# mean of reward and dist
+print("Average dist DDPG: ",mean(episodes_dist_list))
+print("Average reward DDPG: ",mean(episodes_reward_list))
 
 # rolling mean for rewards and mean
 pd_reward = pd.DataFrame(episodes_reward_list)
@@ -47,14 +51,14 @@ sample_mean_r = np.mean(episodes_reward_list)
 sample_std_r = np.std(episodes_reward_list, ddof=1)
 sample_mean_d = np.mean(episodes_dist_list)
 sample_std_d = np.std(episodes_dist_list, ddof=1)
-n=len(episodes_reward_list)
+n=len(episodes_dist_list)
 cl=0.95
-alpha = 1- cl
+alpha = 1-cl
 z= st.norm.ppf(1-alpha/2)
-error = z*(sample_std_r/np.sqrt(n))
-ci_r = (sample_mean_r-error,sample_mean_r+error)
-error = z*(sample_std_d/np.sqrt(n))
-ci_d = (sample_mean_d-error,sample_mean_d+error)
+error_r = z*(sample_std_r/np.sqrt(n))
+ci_r = (sample_mean_r-error_r,sample_mean_r+error_r)
+error_d = z*(sample_std_d/np.sqrt(n))
+ci_d = (sample_mean_d-error_d,sample_mean_d+error_d)
 print("95% confidence intervals of rewards are between: ", ci_r)
 print("95% confidence intervals of dist are between: ", ci_d)
 

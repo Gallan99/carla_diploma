@@ -6,3 +6,5 @@ Standard deviation of DDPG dist: 28.925808256896666
 25th percentile of DDPG dist:  0.9290634617050316
 95% confidence intervals of rewards are between:  (-1159.317382426893, -679.8377091722173)
 95% confidence intervals of dist are between:  (17.87273870293653, 19.140524089077772)
+Average dist DDPG:  18.50663139600715
+Average reward DDPG:  -919.5775457995551
