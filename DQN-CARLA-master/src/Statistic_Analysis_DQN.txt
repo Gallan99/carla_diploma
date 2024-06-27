@@ -6,3 +6,5 @@ Standard deviation of DQN dist: 61.32556546064044
 25th percentile of DQN dist:  11.462341193423152
 95% confidence intervals of rewards are between:  (-9499.941831051294, -7835.384068982245)
 95% confidence intervals of dist are between:  (58.91495642098679, 61.60278643760562)
+Average dist DQN:  60.25887142929621
+Average reward DQN:  -8667.66295001677
